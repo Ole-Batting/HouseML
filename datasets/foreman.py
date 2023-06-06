@@ -173,3 +173,4 @@ class ForemanModule(pl.LightningDataModule):
         )
 
 foreman500 = ForemanModule()
+

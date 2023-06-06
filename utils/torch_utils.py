@@ -8,9 +8,9 @@ import torch.nn.functional as f
 def dilate(
         image: T.Tensor,
         strel: T.Tensor,
-        origin: Tuple[int, int] = (0, 0),
         border_value: float = 0,
     ) -> T.Tensor:
+    origin = (strel.size() - 1) // 2
 
     # first pad the image to have correct unfolding; here is where the origins is used
     image_pad = f.pad(
@@ -36,13 +36,13 @@ def dilate(
     strel_flatten = T.flatten(strel).unsqueeze(0).unsqueeze(-1)
 
     # Perform the greyscale operation; sum would be replaced by rest if you want erosion
-    sums = image_unfold + strel_flatten
+    sums = image_unfold * strel_flatten
 
     # Take maximum over the neighborhood
     result, _ = sums.max(dim=1)
 
     # Reshape the image to recover initial shape
-    return T.reshape(result, image.shape) - 1
+    return T.reshape(result, image.shape)
 
 
 def erode(
