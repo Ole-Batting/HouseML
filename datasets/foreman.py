@@ -5,6 +5,7 @@ import torch as T
 import torch.nn as nn
 import torch.nn.functional as f
 
+from pytorch_lightning import seed_everything
 from torch.utils.data import random_split, DataLoader, Dataset
 from torchvision.transforms import GaussianBlur
 
@@ -18,7 +19,7 @@ class ForemanSet(Dataset):
         image_size: int = 128,
         noise_level: float = 0.1,
         num_samples: int = 500,
-        rand_seed: int = 0,
+        rand_seed: int = 1337,
     ):
         self.image_size = image_size
         self.noise_level = noise_level
@@ -31,6 +32,7 @@ class ForemanSet(Dataset):
 
         if rand_seed is not None:
             T.manual_seed(rand_seed)
+            seed_everything(rand_seed)
 
     def __len__(self):
         return self.num_samples

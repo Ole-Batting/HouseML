@@ -7,7 +7,7 @@ import wandb
 
 
 class WandbImageCallback(pl.Callback):
-    def __init__(self, val_samples, max_samples=10, depth=True, debug=False):
+    def __init__(self, val_samples, max_samples=12, depth=True, debug=False):
         super().__init__()
         self.val_x, self.val_brick = val_samples
         self.val_x = self.val_x[:max_samples]
