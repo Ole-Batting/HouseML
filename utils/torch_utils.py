@@ -59,6 +59,6 @@ def erode(
 
 def get_strel(size: Tuple[int, int] = (3, 3), shape: str = "rect"):
     if shape == "rect":
-        out = T.ones(size)
+        return T.ones(size)
     else:
         raise Exception(f"Shape not implemented: {shape}")
