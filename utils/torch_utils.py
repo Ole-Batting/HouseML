@@ -10,7 +10,7 @@ def dilate(
         strel: T.Tensor,
         border_value: float = 0,
     ) -> T.Tensor:
-    origin = (strel.size() - 1) // 2
+    origin = (T.tensor(strel.size()) - 1) // 2
 
     # first pad the image to have correct unfolding; here is where the origins is used
     image_pad = f.pad(
