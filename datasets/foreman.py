@@ -21,6 +21,11 @@ class ForemanSet(Dataset):
         num_samples: int = 500,
         rand_seed: int = 1337,
     ):
+        
+        if rand_seed is not None:
+            T.manual_seed(rand_seed)
+            #seed_everything(rand_seed)
+            
         self.image_size = image_size
         self.noise_level = noise_level
         self.num_samples = num_samples
@@ -30,9 +35,6 @@ class ForemanSet(Dataset):
         self.obsc_colors = T.rand((self.num_colors, 3))
         self.blurrer = GaussianBlur(kernel_size=(3, 3), sigma=2)
 
-        if rand_seed is not None:
-            T.manual_seed(rand_seed)
-            seed_everything(rand_seed)
 
     def __len__(self):
         return self.num_samples
