@@ -8,7 +8,7 @@ import torch.nn.functional as f
 from torch.utils.data import random_split, DataLoader, Dataset
 from torchvision.transforms import GaussianBlur
 
-from utils.torch_utils import dilate, erode, strel
+from utils.torch_utils import dilate, erode, get_strel
 
 
 
@@ -59,22 +59,20 @@ class ForemanSet(Dataset):
         true_color = self.true_colors[index % self.num_colors]
         false_color = self.false_colors[index % self.num_colors]
         obsc_color = self.obsc_colors[index % self.num_colors]
-        print(true_color, false_color, obsc_color)
         diff = true_color - false_color
         diff[T.abs(diff) > 0.3] = 0
         false_color[diff > 0] *= 0.8
         false_color[diff < 0] = 1 - (1 - false_color[diff < 0]) * 0.8
         true_color[diff < 0] *= 0.8
         true_color[diff > 0] = 1 - (1 - true_color[diff > 0]) * 0.8
-        print(true_color, false_color, obsc_color)
 
         # Generate a random binary label for the image
         label = self.binary_noise_mask(8, 8)
         shade = self.binary_noise_mask(48, 2)
         label *= shade
-        label = dilate(label.float(), strel((3,3)))
-        label = erode(label.float(), strel((5,5)))
-        label = dilate(label.float(), strel((5,5)))
+        label = dilate(label.float(), get_strel((3,3)))
+        label = erode(label.float(), get_strel((5,5)))
+        label = dilate(label.float(), get_strel((5,5)))
 
         # Generate a random RGB image
         image = label * true_color.view(-1,1,1)
@@ -94,7 +92,6 @@ class ForemanSet(Dataset):
         noise += self.image_noise(16,16)
         noise *= self.noise_level
         noisy_image = image + noise
-        print(noisy_image.max())
         noisy_image = T.clamp(noisy_image, 0, 1)
 
         # Apply the binary label to each channel of the image
