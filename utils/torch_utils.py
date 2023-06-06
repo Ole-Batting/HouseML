@@ -57,7 +57,7 @@ def erode(
     return m - dilate(m - image, strel, origin, border_value)
 
 
-def strel(size: Tuple[int, int] = (3, 3), shape: str = "rect"):
+def get_strel(size: Tuple[int, int] = (3, 3), shape: str = "rect"):
     if shape == "rect":
         out = T.ones(size)
     else:
