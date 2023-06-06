@@ -48,13 +48,12 @@ def dilate(
 def erode(
         image: T.Tensor,
         strel: T.Tensor,
-        origin: Tuple[int, int] = (0, 0),
         border_value: float = 0,
     ) -> T.Tensor:
 
     # performs dilation on inverted image, and inverts result.
     m = image.max()
-    return m - dilate(m - image, strel, origin, border_value)
+    return m - dilate(m - image, strel, border_value)
 
 
 def get_strel(size: Tuple[int, int] = (3, 3), shape: str = "rect"):
