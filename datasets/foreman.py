@@ -1,15 +1,18 @@
+from typing import Any, Optional
+
+import pytorch_lightning as pl
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as f
 
-from torch.utils.data import Dataset
+from torch.utils.data import random_split, DataLoader, Dataset
 from torchvision.transforms import GaussianBlur
 
 from utils.torch_utils import dilate, erode, strel
 
 
 
-class Foreman(Dataset):
+class ForemanSet(Dataset):
     def __init__(
         self,
         image_size: int = 128,
@@ -99,4 +102,77 @@ class Foreman(Dataset):
 
         return binary_image, label.float()
 
-foreman500 = Foreman()
+class ForemanModule(pl.LightningDataModule):
+    def __init__(
+        self, 
+        image_size: int = 128,
+        noise_level: float = 0.1,
+        num_samples: int = 500,
+        rand_seed: int = 0,
+        batch_size: int = 1,
+        num_workers: int = 0,
+        test_ratio: float = 0.2
+    ) -> None:
+        super().__init__()
+        self.image_size = image_size
+        self.noise_level = noise_level
+        self.num_samples = num_samples
+        self.rand_seed = rand_seed
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+
+        num_test = int(num_samples * test_ratio)
+        self.test_split = [num_samples - 2 * num_test, num_test, num_test]
+
+
+    def prepare_data(self) -> None:
+        self.data = ForemanSet(
+            image_size=self.image_size,
+            noise_level=self.noise_level,
+            num_samples=self.num_samples,
+            rand_seed=self.rand_seed,
+        )
+
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        train, val, test = random_split(
+            self.data,
+            self.test_split,
+            generator=T.Generator().manual_seed(1337)
+        )
+
+        if stage in (None, 'fit'):
+            self.train_set = train
+            self.val_set = val
+
+        if stage in (None, 'test'):
+            self.test_set = test
+
+
+    def train_dataloader(self) -> DataLoader:
+        return DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers
+        )
+    
+
+    def val_dataloader(self) -> DataLoader:
+        return DataLoader(
+            self.val_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers
+        )
+
+
+    def test_dataloader(self) -> DataLoader:
+        return DataLoader(
+            self.test_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers
+        )
+
+foreman500 = ForemanModule()
