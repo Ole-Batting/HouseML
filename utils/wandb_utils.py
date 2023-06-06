@@ -17,7 +17,7 @@ class WandbImageCallback(pl.Callback):
         self.max_samples = max_samples
         self.linewidth = 1
         
-        image_size = self.val_bgr.shape[:2]
+        image_size = self.val_bgr.shape[1:3]
             
         self.canvas = np.zeros((self.max_samples, *image_size, 3), dtype=np.uint8)
 
